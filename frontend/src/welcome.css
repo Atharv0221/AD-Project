@@ -1,0 +1,128 @@
+@import "@fontsource/merriweather/700.css";
+@import "@fontsource/merriweather/900.css";
+
+.wl {
+  position: relative; min-height: 100vh; overflow: hidden; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 24px;
+  background: linear-gradient(160deg, #fffaf0, #fff0dc);
+  font-family: "Poppins", system-ui, sans-serif;
+}
+
+/* ---------- Background blob ---------- */
+.wl-blob {
+  position: absolute; left: 50%; top: 46%;
+  width: min(80vw, 1000px); height: min(92vh, 820px);
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, .65);
+  border-radius: 42% 58% 55% 45% / 48% 42% 58% 52%;
+  animation: blob 14s ease-in-out infinite;
+}
+@keyframes blob {
+  50% { border-radius: 56% 44% 42% 58% / 56% 52% 48% 44%; transform: translate(-50%, -50%) scale(1.03) rotate(2deg); }
+}
+
+/* ---------- Centre content ---------- */
+.wl-content { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+
+.wl-logo { position: relative; width: clamp(120px, 15vw, 200px); }
+.wl-logo svg { width: 100%; display: block; animation: logoIn .9s cubic-bezier(.34, 1.56, .64, 1) backwards, bob 3.5s ease-in-out .9s infinite; }
+@keyframes logoIn { from { opacity: 0; transform: translateY(-80px) scale(.6) rotate(-12deg); } to { opacity: 1; transform: none; } }
+@keyframes bob { 50% { transform: translateY(-12px) rotate(2deg); } }
+
+.wl-spark { position: absolute; top: -6px; right: -26px; width: 42px; }
+.wl-spark line { stroke: #f59e0b; stroke-width: 5; stroke-linecap: round; animation: spark 1.6s ease-in-out infinite; }
+.wl-spark line:nth-child(2) { animation-delay: .2s; }
+.wl-spark line:nth-child(3) { animation-delay: .4s; }
+@keyframes spark { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+
+.wl-title { font-family: "Merriweather", Georgia, serif; line-height: 1.1; }
+.wl-title span { display: block; animation: rise .7s cubic-bezier(.22, 1, .36, 1) backwards; animation-delay: calc(var(--i) * 140ms + 300ms); }
+.wl-line1 { font-size: clamp(30px, 5.2vw, 72px); font-weight: 900; color: #1f2430; }
+.wl-line2 {
+  font-size: clamp(38px, 7vw, 96px); font-weight: 900;
+  background: linear-gradient(90deg, #e2552b, #ff9a3d, #e2552b); background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.wl-line2 { animation: rise .7s cubic-bezier(.22, 1, .36, 1) backwards, shine 4s linear infinite; animation-delay: .58s, 1.3s; }
+@keyframes rise { from { opacity: 0; transform: translateY(34px); } to { opacity: 1; transform: none; } }
+@keyframes shine { to { background-position: -200% 0; } }
+
+/* ---------- Language pills ---------- */
+.wl-pills { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+.wl-pill {
+  padding: 13px 38px; border-radius: 999px; border: 1.5px solid #f2b8a2; background: #fff; color: #1f2430;
+  font: 500 clamp(16px, 1.6vw, 21px) "Poppins", system-ui, sans-serif; cursor: pointer;
+  box-shadow: 0 6px 18px rgba(226, 85, 43, .1);
+  transition: transform .2s, background .25s, color .25s, box-shadow .25s;
+  animation: popIn .5s cubic-bezier(.34, 1.56, .64, 1) backwards; animation-delay: calc(var(--i) * 100ms + 900ms);
+}
+@keyframes popIn { from { opacity: 0; transform: scale(.6) translateY(20px); } to { opacity: 1; transform: none; } }
+.wl-pill:hover { transform: translateY(-3px); }
+.wl-pill:active { transform: scale(.94); }
+.wl-pill.active { background: #e2552b; color: #fff; border-color: #e2552b; box-shadow: 0 10px 24px rgba(226, 85, 43, .4); transform: translateY(-2px); }
+
+/* ---------- Divider and tap hint ---------- */
+.wl-divider { display: flex; align-items: center; gap: 10px; width: 260px; margin-top: 4px; animation: rise .6s 1.3s backwards; }
+.wl-divider i { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, #e7d8c3, transparent); }
+.wl-divider b { width: 9px; height: 9px; border-radius: 50%; background: #f59e0b; animation: dot 1.4s ease-in-out infinite; }
+@keyframes dot { 50% { transform: scale(1.7); opacity: .6; } }
+
+.wl-tap { display: flex; align-items: center; gap: 12px; font-size: clamp(18px, 1.8vw, 24px); font-weight: 500; color: #4a3b32; animation: rise .6s 1.45s backwards; }
+.wl-hand { position: relative; display: grid; place-items: center; width: 46px; height: 46px; color: #7a6a60; animation: tap 1.6s ease-in-out infinite; }
+.wl-hand::after { content: ""; position: absolute; top: 4px; left: 12px; width: 18px; height: 18px; border: 2px solid #f59e0b; border-radius: 50%; animation: ripple 1.6s ease-out infinite; }
+@keyframes tap { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(7px) scale(.92); } }
+@keyframes ripple { 0% { transform: scale(.4); opacity: 1; } 70%, 100% { transform: scale(2.4); opacity: 0; } }
+
+/* ---------- Decorations ---------- */
+.wl-deco { position: absolute; z-index: 2; pointer-events: none; }
+
+.wl-lemon { top: 3%; right: 2.5%; width: clamp(70px, 8.5vw, 150px); filter: drop-shadow(0 8px 14px rgba(0,0,0,.15));
+  animation: dropIn 1s cubic-bezier(.34, 1.56, .64, 1) .5s backwards, spin 28s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes dropIn { from { opacity: 0; transform: translateY(-90px) scale(.5); } to { opacity: 1; transform: none; } }
+
+.wl-tomato { left: -1.5%; top: 58%; width: clamp(80px, 9vw, 160px); filter: drop-shadow(0 8px 14px rgba(0,0,0,.2));
+  animation: fromLeft 1s cubic-bezier(.22, 1, .36, 1) .6s backwards, bob2 4s ease-in-out 1.6s infinite; }
+@keyframes fromLeft { from { opacity: 0; transform: translateX(-120px); } to { opacity: 1; transform: none; } }
+@keyframes bob2 { 50% { transform: translateY(-14px) rotate(8deg); } }
+
+.wl-bowl { right: -5vw; top: 36%; width: clamp(170px, 22vw, 350px); aspect-ratio: 1; border-radius: 50%;
+  border: clamp(8px, 1vw, 14px) solid #c9772e; overflow: hidden; background: #f4e3c8;
+  box-shadow: 0 20px 40px rgba(120, 60, 10, .3), inset 0 0 20px rgba(0,0,0,.2);
+  display: grid; place-items: center; font-size: 90px;
+  animation: fromRight 1.1s cubic-bezier(.22, 1, .36, 1) .7s backwards, bob3 5s ease-in-out 1.8s infinite; }
+.wl-bowl img { width: 100%; height: 100%; object-fit: cover; }
+@keyframes fromRight { from { opacity: 0; transform: translateX(200px) rotate(40deg); } to { opacity: 1; transform: none; } }
+@keyframes bob3 { 50% { transform: translateY(-12px) rotate(-3deg); } }
+
+.wl-leaf { transform-origin: 50% 100%; animation: sway 4s ease-in-out infinite; }
+.wl-leaf.l1 { top: -3%; left: -1%; width: clamp(110px, 14vw, 230px); filter: blur(3px); opacity: .9; }
+.wl-leaf.l2 { top: 26%; right: 9%; width: clamp(40px, 4.5vw, 80px); animation-delay: .6s; }
+.wl-leaf.l3 { bottom: 16%; left: 7%; width: clamp(34px, 3.5vw, 64px); animation-delay: 1.2s; }
+.wl-leaf.l4 { bottom: 12%; right: 2%; width: clamp(110px, 12vw, 200px); filter: blur(3px); opacity: .9; animation-delay: .9s; }
+.wl-leaf.l5 { bottom: 18%; right: 11%; width: clamp(36px, 4vw, 70px); animation-delay: 1.8s; }
+@keyframes sway { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(9deg); } }
+
+/* faint outline icons and dots */
+.wl-ghost { color: rgba(226, 85, 43, .13); animation: drift 9s ease-in-out infinite; }
+.wl-ghost.g1 { top: 16%; left: 8%; } .wl-ghost.g2 { bottom: 7%; left: 7%; animation-delay: 2s; } .wl-ghost.g3 { top: 6%; right: 18%; animation-delay: 4s; }
+@keyframes drift { 50% { transform: translateY(-16px) rotate(6deg); } }
+.wl-dots { width: 90px; height: 90px; background-image: radial-gradient(#f4c9a0 3px, transparent 3px); background-size: 22px 22px; opacity: .7; animation: fadeIn 1.5s 1s backwards; }
+.wl-dots.d1 { top: 30%; left: 5%; } .wl-dots.d2 { bottom: 20%; right: 18%; }
+@keyframes fadeIn { from { opacity: 0; } }
+
+/* ---------- Bottom waves ---------- */
+.wl-waves { position: absolute; left: 0; bottom: 0; width: 100%; height: clamp(70px, 14vh, 140px); overflow: hidden; z-index: 1; }
+.wl-waves svg { position: absolute; bottom: 0; left: 0; width: 200%; height: 100%; }
+.wl-waves .w1 { animation: wave 14s linear infinite; }
+.wl-waves .w2 { animation: wave 22s linear infinite reverse; opacity: .7; }
+@keyframes wave { to { transform: translateX(-50%); } }
+
+@media (max-width: 700px) {
+  .wl-bowl { right: -22vw; top: 62%; }
+  .wl-ghost, .wl-dots { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wl *, .wl *::before, .wl *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
