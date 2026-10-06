@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Pointer, Utensils, Coffee } from "lucide-react";
 import { useApp } from "../context.jsx";
 import { T } from "../i18n.js";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const TITLE = {
   en: ["Welcome to", "the Canteen"],
   hi: ["कैंटीन में", "आपका स्वागत है"],
@@ -23,19 +21,9 @@ function Leaf({ className }) {
 export default function Welcome() {
   const nav = useNavigate();
   const { lang, setLang } = useApp();
-  const [bowl, setBowl] = useState(null);
-
-  useEffect(() => {
-    fetch(`${API}/menu`)
-      .then((r) => r.json())
-      .then((d) => {
-        const p = d.find((i) => i.name === "Welcome" && i.image_url) || d.find((i) => i.image_url);
-        if (p) setBowl(p.image_url);
-      })
-      .catch(() => {});
-  }, []);
-
+  const bowl = "/thali.jpg";
   const [l1, l2] = TITLE[lang];
+
 
   return (
     <div className="wl" onClick={() => nav("/dining")}>
