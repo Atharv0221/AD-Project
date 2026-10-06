@@ -1,0 +1,101 @@
+html, body { overflow-x: hidden; }
+
+/* ---------- Phones and small tablets ---------- */
+@media (max-width: 700px) {
+
+  /* Welcome */
+  .wl { min-height: 100dvh; padding: 16px; }
+  .wl-blob { width: 150vw; height: 78vh; }
+  .wl-bowl { width: 130px; right: -38px; top: auto; bottom: 70px; border-width: 6px; }
+  .wl-lemon { width: 56px; }
+  .wl-tomato { width: 64px; top: 66%; left: -22px; }
+  .wl-leaf.l1 { width: 90px; }
+  .wl-leaf.l4 { width: 90px; }
+  .wl-pills { gap: 10px; }
+  .wl-pill { padding: 10px 22px; font-size: 16px; }
+  .wl-divider { width: 200px; }
+  .wl-tap { font-size: 18px; }
+
+  /* Dine-In / Takeaway: wide horizontal cards */
+  .k-center { padding: 20px 16px; gap: 20px; justify-content: flex-start; padding-top: 12vh; }
+  .k-cards { gap: 14px; width: 100%; }
+  .k-card { width: 100%; max-width: 340px; height: 120px; flex-direction: row; justify-content: flex-start;
+            gap: 18px; padding: 0 22px; font-size: 22px; border-radius: 28px; }
+  .k-icon { width: 76px; height: 76px; flex-shrink: 0; }
+  .k-icon svg { width: 42px; height: 42px; }
+
+  /* Menu */
+  .k-head { padding: 14px 12px 0; gap: 10px; }
+  .k-head h1 { font-size: 24px; }
+  .k-back { width: 42px; height: 42px; }
+  .k-badge { padding: 6px 14px; font-size: 14px; }
+  .k-menu { padding: 12px 12px 120px; gap: 12px; }
+  .k-side { padding: 8px; border-radius: 20px; gap: 6px; }
+  .k-cat { padding: 10px 16px; font-size: 15px; border-radius: 14px; }
+  .k-cat span { font-size: 20px; }
+  .k-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .k-item { padding: 8px 8px 12px; border-radius: 20px; }
+  .k-photo { border-radius: 14px; font-size: 48px; }
+  .k-item h3 { font-size: 15px; margin: 8px 2px 6px; }
+  .k-price { font-size: 17px; }
+  .k-row { flex-wrap: wrap; gap: 6px; padding: 0 2px; }
+  .k-add { width: 38px; height: 38px; }
+  .k-step button { width: 30px; height: 30px; }
+  .k-qty-badge { min-width: 26px; height: 26px; font-size: 13px; }
+
+  /* Floating cart bar */
+  .k-cart { width: calc(100% - 20px); bottom: 10px; padding: 8px 8px 8px 20px; font-size: 16px; }
+  .k-cart button { padding: 12px 20px; font-size: 15px; }
+
+  /* Customise sheet */
+  .k-sheet { padding: 20px 16px; border-radius: 26px 26px 0 0; }
+  .k-sheet-photo { width: 88px; height: 88px; border-radius: 18px; }
+  .k-sheet h2 { font-size: 21px; }
+  .k-opt { padding: 12px 14px; font-size: 15px; }
+  .k-primary { padding: 14px 18px; font-size: 16px; }
+
+  /* Cart page */
+  .k-cartwrap { padding: 12px; gap: 16px; }
+  .k-line { flex-wrap: wrap; gap: 10px; padding: 10px; }
+  .k-line-photo { width: 64px; height: 64px; }
+  .k-line-info { min-width: 0; flex-basis: calc(100% - 90px); }
+  .k-line-total { width: auto; margin-left: auto; }
+  .k-summary { position: static; }
+
+  /* Payment */
+  .k-paywrap { padding: 12px; gap: 16px; }
+  .k-method { padding: 12px; font-size: 16px; }
+  .k-method-icon { width: 48px; height: 48px; }
+  .k-paybox { padding: 20px; border-radius: 24px; }
+
+  /* Token tracking */
+  .k-token { font-size: 76px; }
+  .k-ticket { padding: 20px; border-radius: 26px; }
+  .tr-track { width: 100%; }
+  .tr-dot { width: 46px; height: 46px; }
+  .tr-node { font-size: 12px; }
+  .tr-node::before { top: 21px; }
+
+  /* Kitchen */
+  .kt-page { padding: 12px; }
+  .kt-token { font-size: 26px; }
+
+  /* Admin */
+  .ad-main { padding: 16px 12px 60px; }
+  .ad-side { padding: 12px; gap: 6px; }
+  .ad-side h2 { width: 100%; margin: 0 4px 4px; }
+  .ad-nav { padding: 10px 14px; font-size: 14px; }
+  .ad-top h1 { font-size: 24px; }
+  .ad-search input { width: 110px; }
+  .ad-card { padding: 14px; border-radius: 22px; }
+  .ad-stat b { font-size: 22px; }
+  .ad-row { flex-wrap: wrap; gap: 10px; }
+  .ad-state { display: none; }
+  .ad-two { grid-template-columns: 1fr; }
+}
+
+/* Touch screens: no sticky hover effects */
+@media (hover: none) {
+  .k-item:hover, .k-card:hover, .k-method:hover { transform: none; }
+  .k-item:hover .k-photo img { transform: none; }
+}
