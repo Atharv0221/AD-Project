@@ -26,7 +26,7 @@
 .wl-content { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 18px; }
 
 .wl-logo { position: relative; width: clamp(120px, 15vw, 200px); }
-.wl-logo svg { width: 100%; display: block; animation: logoIn .9s cubic-bezier(.34, 1.56, .64, 1) backwards, bob 3.5s ease-in-out .9s infinite; }
+.wl-logo > svg:first-child { width: 100%; display: block; animation: logoIn .9s cubic-bezier(.34, 1.56, .64, 1) backwards, bob 3.5s ease-in-out .9s infinite; }
 @keyframes logoIn { from { opacity: 0; transform: translateY(-80px) scale(.6) rotate(-12deg); } to { opacity: 1; transform: none; } }
 @keyframes bob { 50% { transform: translateY(-12px) rotate(2deg); } }
 
@@ -126,3 +126,5 @@
 @media (prefers-reduced-motion: reduce) {
   .wl *, .wl *::before, .wl *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
+
+.wl-logo .wl-spark { position: absolute; top: -6px; right: -26px; width: 42px; height: 42px; }
