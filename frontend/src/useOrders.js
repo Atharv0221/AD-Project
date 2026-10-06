@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { io } from "socket.io-client";
 
-export const API = "http://localhost:5000";
+export const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export function useOrders() {
   const [orders, setOrders] = useState([]);

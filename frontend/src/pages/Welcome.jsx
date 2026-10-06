@@ -4,8 +4,7 @@ import { Pointer, Utensils, Coffee } from "lucide-react";
 import { useApp } from "../context.jsx";
 import { T } from "../i18n.js";
 
-const API = "http://localhost:5000";
-
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const TITLE = {
   en: ["Welcome to", "the Canteen"],
   hi: ["कैंटीन में", "आपका स्वागत है"],

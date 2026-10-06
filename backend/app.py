@@ -5,6 +5,7 @@ import re
 import secrets
 from datetime import datetime, timedelta
 from functools import wraps
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from bson import ObjectId
 from dotenv import load_dotenv
@@ -17,6 +18,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 

@@ -4,8 +4,7 @@ import { ArrowLeft, Plus, Minus, X, Check } from "lucide-react";
 import { useApp } from "../context.jsx";
 import { T } from "../i18n.js";
 
-const API = "http://localhost:5000";
-const CAT_ICON = { "Hot Drinks": "☕", "Cold Drinks": "🥤", Breakfast: "🍳", Lunch: "🍛" };
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";const CAT_ICON = { "Hot Drinks": "☕", "Cold Drinks": "🥤", Breakfast: "🍳", Lunch: "🍛" };
 
 export const lineKey = (name, opts) => name + "|" + [...opts].sort().join(",");
 

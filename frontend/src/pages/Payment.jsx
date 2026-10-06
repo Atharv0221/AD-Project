@@ -4,8 +4,7 @@ import { ArrowLeft, Smartphone, CreditCard, Store, Loader2 } from "lucide-react"
 import { QRCodeSVG } from "qrcode.react";
 import { useApp } from "../context.jsx";
 
-const API = "http://localhost:5000";
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const METHODS = [
   { id: "upi", label: "UPI", sub: "Scan and pay", Icon: Smartphone, tint: "#e8f1fb" },
