@@ -1,9 +1,14 @@
+import csv
+import io
 import os
 import re
-from datetime import datetime
+import secrets
+from datetime import datetime, timedelta
+from functools import wraps
+
 from bson import ObjectId
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from pymongo import MongoClient, ReturnDocument
@@ -169,6 +174,197 @@ def confirm_payment(oid):
     socketio.emit("orders_changed")
     return jsonify({"ok": True})
 
+# ====================== ADMIN ======================
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "canteen123")
+admin_tokens = set()
+
+
+def admin_only(f):
+    @wraps(f)
+    def wrapper(*a, **k):
+        if request.headers.get("X-Admin-Token") not in admin_tokens:
+            return jsonify({"error": "Unauthorized"}), 401
+        return f(*a, **k)
+    return wrapper
+
+
+@app.route("/admin/login", methods=["POST"])
+def admin_login():
+    pw = (request.get_json(force=True) or {}).get("password")
+    if pw != ADMIN_PASSWORD:
+        return jsonify({"error": "Wrong password"}), 401
+    token = secrets.token_hex(16)
+    admin_tokens.add(token)
+    return jsonify({"token": token})
+
+
+def item_json(it):
+    file = find_image(it["name"])
+    return {
+        "id": str(it["_id"]),
+        "name": it["name"],
+        "category": it["category"],
+        "price": it.get("price"),
+        "emoji": it.get("emoji", ""),
+        "available": it.get("available", False),
+        "customizations": it.get("customizations", []),
+        "image_url": f"{request.host_url}static/images/{file}" if file else None,
+    }
+
+
+def parse_options(text):
+    """'Extra Cheese:10, No Onion' -> [{'name': 'Extra Cheese', 'price': 10}, ...]"""
+    out = []
+    for part in (text or "").split(","):
+        part = part.strip()
+        if not part:
+            continue
+        name, _, price = part.partition(":")
+        price = price.strip()
+        out.append({"name": name.strip(), "price": int(price) if price.isdigit() else 0})
+    return out
+
+
+@app.route("/admin/menu")
+@admin_only
+def admin_menu():
+    items = db.menu_items.find().sort([("category", 1), ("name", 1)])
+    return jsonify([item_json(i) for i in items])
+
+
+@app.route("/admin/menu", methods=["POST"])
+@admin_only
+def admin_add_item():
+    f = request.form
+    name = f.get("name", "").strip()
+    category = f.get("category", "").strip()
+    if not name or not category:
+        return jsonify({"error": "Name and category are required"}), 400
+    try:
+        price = int(f.get("price", ""))
+        if price < 0:
+            raise ValueError
+    except ValueError:
+        return jsonify({"error": "Enter a valid price"}), 400
+    if db.menu_items.find_one({"name": re.compile(f"^{re.escape(name)}$", re.I)}):
+        return jsonify({"error": "A dish with this name already exists"}), 409
+
+    doc = {
+        "name": name, "category": category, "price": price,
+        "emoji": f.get("emoji", "").strip() or "🍽️",
+        "image": "", "available": True,
+        "customizations": parse_options(f.get("options")),
+    }
+    res = db.menu_items.insert_one(doc)
+
+    img = request.files.get("image")
+    if img and img.filename:
+        ext = img.filename.rsplit(".", 1)[-1].lower()
+        if ext in ("jpg", "jpeg", "png", "webp"):
+            os.makedirs(IMAGE_DIR, exist_ok=True)
+            img.save(os.path.join(IMAGE_DIR, f"{slug(name)}.{ext}"))
+
+    return jsonify(item_json(db.menu_items.find_one({"_id": res.inserted_id}))), 201
+
+
+@app.route("/admin/menu/<iid>", methods=["PATCH"])
+@admin_only
+def admin_edit_item(iid):
+    data = request.get_json(force=True) or {}
+    item = db.menu_items.find_one({"_id": ObjectId(iid)})
+    if not item:
+        return jsonify({"error": "Item not found"}), 404
+
+    upd = {}
+    if "price" in data:
+        try:
+            upd["price"] = int(data["price"])
+            if upd["price"] < 0:
+                raise ValueError
+        except (ValueError, TypeError):
+            return jsonify({"error": "Enter a valid price"}), 400
+    if "available" in data:
+        upd["available"] = bool(data["available"])
+    if not upd:
+        return jsonify({"error": "Nothing to update"}), 400
+    if upd.get("available") and upd.get("price", item.get("price")) is None:
+        return jsonify({"error": "Set a price first"}), 400
+
+    db.menu_items.update_one({"_id": item["_id"]}, {"$set": upd})
+    return jsonify({"ok": True})
+
+
+@app.route("/admin/menu/<iid>", methods=["DELETE"])
+@admin_only
+def admin_delete_item(iid):
+    r = db.menu_items.delete_one({"_id": ObjectId(iid)})
+    return jsonify({"deleted": r.deleted_count})
+
+
+@app.route("/admin/stats")
+@admin_only
+def admin_stats():
+    days = min(max(int(request.args.get("days", 7)), 1), 90)
+    start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=days - 1)
+    match = {"$match": {"created_at": {"$gte": start}, "payment.status": "paid"}}
+
+    def agg(*stages):
+        return list(db.orders.aggregate([match, *stages]))
+
+    line_total = {"$multiply": ["$items.unit", "$items.qty"]}
+
+    t = agg({"$group": {"_id": None, "orders": {"$sum": 1}, "revenue": {"$sum": "$total"}}})
+    totals = t[0] if t else {"orders": 0, "revenue": 0}
+
+    per_day = {r["_id"]: r for r in agg({"$group": {
+        "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$created_at"}},
+        "orders": {"$sum": 1}, "revenue": {"$sum": "$total"}}})}
+    daily = []
+    for i in range(days):
+        d = start + timedelta(days=i)
+        r = per_day.get(d.strftime("%Y-%m-%d"), {})
+        daily.append({"day": d.strftime("%d %b"), "revenue": r.get("revenue", 0), "orders": r.get("orders", 0)})
+
+    top = agg({"$unwind": "$items"},
+              {"$group": {"_id": "$items.name", "sold": {"$sum": "$items.qty"}, "revenue": {"$sum": line_total}}},
+              {"$sort": {"sold": -1}}, {"$limit": 8})
+
+    hours = {r["_id"]: r["orders"] for r in agg(
+        {"$group": {"_id": {"$hour": "$created_at"}, "orders": {"$sum": 1}}})}
+    lo, hi = min([7, *hours]), max([19, *hours])
+    by_hour = [{"hour": f"{h}:00", "orders": hours.get(h, 0)} for h in range(lo, hi + 1)]
+
+    by_payment = agg({"$group": {"_id": "$payment.method", "orders": {"$sum": 1}, "revenue": {"$sum": "$total"}}})
+    by_cat = agg({"$unwind": "$items"},
+                 {"$lookup": {"from": "menu_items", "localField": "items.name", "foreignField": "name", "as": "m"}},
+                 {"$unwind": "$m"},
+                 {"$group": {"_id": "$m.category", "revenue": {"$sum": line_total}}},
+                 {"$sort": {"revenue": -1}})
+
+    return jsonify({
+        "orders": totals["orders"],
+        "revenue": totals["revenue"],
+        "active": db.orders.count_documents({"status": {"$in": ["awaiting_payment", "preparing", "ready"]}}),
+        "daily": daily,
+        "top": [{"name": r["_id"], "sold": r["sold"], "revenue": r["revenue"]} for r in top],
+        "by_hour": by_hour,
+        "by_payment": [{"name": r["_id"].upper(), "value": r["revenue"]} for r in by_payment],
+        "by_category": [{"name": r["_id"], "value": r["revenue"]} for r in by_cat],
+    })
+
+
+@app.route("/admin/export")
+@admin_only
+def admin_export():
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["Token", "Date", "Time", "Type", "Payment", "Status", "Items", "Total"])
+    for o in db.orders.find().sort("created_at", -1):
+        items = "; ".join(f"{l['qty']}x {l['name']}" for l in o["items"])
+        w.writerow([o["token"], o["created_at"].strftime("%Y-%m-%d"), o["created_at"].strftime("%H:%M"),
+                    o["type"], o["payment"]["method"], o["status"], items, o["total"]])
+    return Response(buf.getvalue(), mimetype="text/csv",
+                    headers={"Content-Disposition": "attachment; filename=orders.csv"})
 
 if __name__ == "__main__":
     socketio.run(app, debug=True, port=5000, allow_unsafe_werkzeug=True)

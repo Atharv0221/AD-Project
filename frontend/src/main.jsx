@@ -6,6 +6,7 @@ import { AppProvider } from "./context.jsx";
 import "./index.css";
 import "./welcome.css";
 import "./kiosk.css";
+import "./admin.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

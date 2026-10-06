@@ -6,6 +6,7 @@ import Cart from "./pages/Cart.jsx";
 import Payment from "./pages/Payment.jsx";
 import Token from "./pages/Token.jsx";
 import Kitchen from "./pages/Kitchen.jsx";
+import Admin from "./pages/Admin.jsx";
 
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/payment" element={<Payment />} />
         <Route path="/token" element={<Token />} />
         <Route path="/kitchen" element={<Kitchen />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </div>
   );
