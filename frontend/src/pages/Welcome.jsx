@@ -29,7 +29,7 @@ export default function Welcome() {
     fetch(`${API}/menu`)
       .then((r) => r.json())
       .then((d) => {
-        const p = d.find((i) => i.name === "Pohe" && i.image_url) || d.find((i) => i.image_url);
+        const p = d.find((i) => i.name === "Poli Bhaji" && i.image_url) || d.find((i) => i.image_url);
         if (p) setBowl(p.image_url);
       })
       .catch(() => {});

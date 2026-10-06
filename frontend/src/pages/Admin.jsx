@@ -292,8 +292,7 @@ function Row({ it, save, del }) {
 }
 
 function AddDish({ token, categories, onClose, onDone }) {
-  const [f, setF] = useState({ name: "", category: categories[0] || "", price: "", emoji: "", options: "" });
-  const [file, setFile] = useState(null);
+const [f, setF] = useState({ name: "", category: "", price: "", emoji: "", options: "" });  const [file, setFile] = useState(null);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
@@ -323,10 +322,19 @@ function AddDish({ token, categories, onClose, onDone }) {
 
         <input required placeholder="Dish name (e.g. Cold Coffee)" value={f.name} onChange={set("name")} />
         <div className="ad-two">
-          <input required list="cats" placeholder="Category" value={f.category} onChange={set("category")} />
-          <datalist id="cats">{categories.map((c) => <option key={c} value={c} />)}</datalist>
-          <input required type="number" min="0" placeholder="Price ₹" value={f.price} onChange={set("price")} />
-        </div>
+  <input required autoComplete="off" placeholder="Category (type or pick below)"
+         value={f.category} onChange={set("category")} />
+  <input required type="number" min="0" placeholder="Price ₹" value={f.price} onChange={set("price")} />
+</div>
+<div className="ad-chips">
+  {categories.map((c) => (
+    <button type="button" key={c}
+            className={"ad-chip" + (f.category === c ? " on" : "")}
+            onClick={() => setF({ ...f, category: c })}>
+      {c}
+    </button>
+  ))}
+</div>
         <div className="ad-two">
           <input placeholder="Emoji (e.g. ☕)" value={f.emoji} onChange={set("emoji")} />
           <input placeholder="Options: Extra Cheese:10, No Onion" value={f.options} onChange={set("options")} />
