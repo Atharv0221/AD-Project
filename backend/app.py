@@ -69,7 +69,7 @@ def order_json(o):
         "id": str(o["_id"]),
         "token": o["token"],
         "type": o["type"],
-        "items": o["items"],
+        "items": [{**ln, "item_id": str(ln["item_id"])} if "item_id" in ln else ln for ln in o["items"]],
         "total": o["total"],
         "payment": o["payment"],
         "status": o["status"],
@@ -102,7 +102,14 @@ def create_order():
 
         unit = menu_item["price"] + extra
         total += unit * qty
-        lines.append({"name": menu_item["name"], "options": l.get("options", []), "qty": qty, "unit": unit})
+        lines.append({
+    "item_id": menu_item["_id"],
+    "name": menu_item["name"],
+    "category": menu_item["category"],
+    "options": l.get("options", []),
+    "qty": qty,
+    "unit": unit,
+})
 
     if not lines:
         return jsonify({"error": "Cart is empty"}), 400
@@ -120,9 +127,10 @@ def create_order():
     db.orders.insert_one(order)
     socketio.emit("orders_changed")
 
+    clean = [{**ln, "item_id": str(ln["item_id"])} for ln in lines]
     return jsonify({
         "id": str(order["_id"]),
-        "token": order["token"], "type": order_type, "items": lines, "total": total,
+        "token": order["token"], "type": order_type, "items": clean, "total": total,
         "payment": order["payment"], "status": order["status"],
         "time": order["created_at"].strftime("%I:%M %p"),
     }), 201
@@ -338,9 +346,8 @@ def admin_stats():
 
     by_payment = agg({"$group": {"_id": "$payment.method", "orders": {"$sum": 1}, "revenue": {"$sum": "$total"}}})
     by_cat = agg({"$unwind": "$items"},
-                 {"$lookup": {"from": "menu_items", "localField": "items.name", "foreignField": "name", "as": "m"}},
-                 {"$unwind": "$m"},
-                 {"$group": {"_id": "$m.category", "revenue": {"$sum": line_total}}},
+                 {"$group": {"_id": {"$ifNull": ["$items.category", "Uncategorised"]},
+                             "revenue": {"$sum": line_total}}},
                  {"$sort": {"revenue": -1}})
 
     return jsonify({
